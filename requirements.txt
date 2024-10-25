@@ -1,0 +1,6 @@
+onnxruntime
+numpy
+opencv-python
+pyautogui
+pywin32
+psutil

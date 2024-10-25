@@ -1,0 +1,3 @@
+PROCESS_NAME = "Feishu.exe"
+
+SCALE_FACTOR = 0.8
