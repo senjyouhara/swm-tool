@@ -25,6 +25,7 @@ def img_handle(img, type, template_img):
             h=int(template_img.shape[0] * config.SCALE_FACTOR),
             centerX=int(i[0]) + int(template_img.shape[1]),
             centerY=int(i[1]) + int(template_img.shape[0]),
+            is_finished=False
         )
         my_list.append(item)
     return my_list
@@ -73,22 +74,23 @@ def get_order_info(img):
     prev_order = None
     # origin_img = cv2.cvtColor(origin_img, cv2.COLOR_BGR2RGB)
 
-    for order in order_list:
-        cv2.rectangle(origin_img, (order.x, order.y), (order.x + order.w, order.y + order.h),
-                      (0, 0, 255), 2)
-        if prev_order is not None and (order.x - prev_order.x > 20):
-            index += 1
-            guest = f"guest {index}"
-        if order_map.get(guest) is None:
-            order_map[guest] = {
-                "list": [],
-            }
-        order_map[guest]['list'].append(order)
-        prev_order = order
+    if len(order_list) > 0:
+        for order in order_list:
+            cv2.rectangle(origin_img, (order.x, order.y), (order.x + order.w, order.y + order.h),
+                          (0, 0, 255), 2)
+            if prev_order is not None and (order.x - prev_order.x > 20):
+                index += 1
+                guest = f"guest {index}"
+            if order_map.get(guest) is None:
+                order_map[guest] = {
+                    "list": [],
+                }
+            order_map[guest]['list'].append(order)
+            prev_order = order
 
-    # origin_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        # origin_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
-    for e in order_map:
-        order_map[e]['list'].sort(key=lambda x: x.y * 100000 + x.x)
+        for e in order_map:
+            order_map[e]['list'].sort(key=lambda x: x.y * 100000 + x.x)
 
     return order_map, origin_img
