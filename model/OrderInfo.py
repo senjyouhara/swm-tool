@@ -7,13 +7,15 @@ class OrderInfo:
     centerX: int
     centerY: int
     is_finished: bool
+    score: float
 
-    def __init__(self, type, x, y, w, h, centerX, centerY, is_finished):
+    def __init__(self, type, x, y, w, h, centerX, centerY, score, is_finished=False):
         self.type = type
         self.x = x
         self.y = y
         self.w = w
         self.h = h
+        self.score = score
         self.centerX = centerX
         self.centerY = centerY
         self.is_finished = is_finished

@@ -1,12 +1,25 @@
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
 import time
 import cv2
+from PIL import Image, ImageDraw, ImageFont
 
 import config
+from model.OnnxModel import get_onnx_results
 from model.OrderInfo import OrderInfo
 
+def cv2AddChineseText(img: np.ndarray, text: str, position: Tuple[int, int], color: Tuple[int, ...], font_size = 14) -> np.ndarray:
+    cv2img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    pilimg = Image.fromarray(cv2img)
+    # PIL图片上打印汉字
+    draw = ImageDraw.Draw(pilimg)  # 图片上打印
+    # simsun 宋体
+    font = ImageFont.truetype("微软雅黑.ttf", font_size, encoding="utf-8")
+    # 位置，文字，颜色==红色，字体引入
+    draw.text(position, text, color, font=font)
+    # PIL图片转cv2 图片
+    return cv2.cvtColor(np.array(pilimg), cv2.COLOR_RGB2BGR)
 
 def img_handle(img, type, template_img):
     img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
@@ -15,6 +28,25 @@ def img_handle(img, type, template_img):
     template = cv2.cvtColor(template, cv2.COLOR_RGBA2GRAY)
 
     res = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED)
+    (minVal, maxVal, minLoc, maxLoc) = cv2.minMaxLoc(res)
+    (startX, startY) = maxLoc
+    endX = startX + template.shape[1]
+    endY = startY + template.shape[0]
+    if maxVal > 0.8:
+        item = OrderInfo(
+                type,
+                x=startX,
+                y=startY,
+                w=template.shape[1],
+                h=template.shape[0],
+                centerX=int(startX + template_img.shape[1] * 0.5),
+                centerY=int(startY + template_img.shape[0] * 0.5),
+                score=0.85,
+            )
+
+        return item
+
+    return None
 
     my_list = []
 
@@ -29,7 +61,7 @@ def img_handle(img, type, template_img):
             h=int(template_img.shape[0] * config.SCALE_FACTOR),
             centerX=int(i[0]) + int(template_img.shape[1]),
             centerY=int(i[1]) + int(template_img.shape[0]),
-            is_finished = False,
+            score=0.85,
         )
         my_list.append(item)
     return my_list[0] if len(my_list) else None
@@ -60,29 +92,17 @@ def get_cooking_info(img):
             "type": "油炸锅",
             "path": "assets/frying-machine.png",
         },
-        {
-            "type": "油炸锅(已完成)",
-            "path": "assets/frying-machine-finish.png",
-        },
+        # {
+        #     "type": "油炸锅(已完成)",
+        #     "path": "assets/frying-machine-finish.png",
+        # },
         {
             "type": "金币",
             "path": "assets/gold.png",
         },
         {
-            "type": "刀",
-            "path": "assets/knife.png",
-        },
-        {
-            "type": "肉块",
-            "path": "assets/meat.png",
-        },
-        {
             "type": "土豆",
             "path": "assets/potato.png",
-        },
-        {
-            "type": "土豆(处理中)",
-            "path": "assets/potato-process.png",
         },
         {
             "type": "包装袋",
@@ -91,18 +111,27 @@ def get_cooking_info(img):
     ]
 
     order_list: List[OrderInfo] = []
-
     origin_img = img
+
+    onnx_info_list = get_onnx_results(config.ONNX_MODEL,  img)
+    order_list.extend(onnx_info_list)
 
     for type in type_list:
         tmp = img_handle(img, type['type'], cv2.imread(type['path']))
         if tmp is not None:
             order_list.append(tmp)
+    colors = np.random.uniform(0, 255, size=(len(order_list), 3))
 
-    for order in order_list:
+    for index,order in enumerate(order_list):
+        color = tuple(map(lambda x: int(x), colors[index]))
+
         cv2.rectangle(origin_img, (order.x, order.y), (order.x + order.w, order.y + order.h),
-                      (0, 0, 255), 2)
+                      color, 2)
+        cv2.rectangle(origin_img, (order.x-1, order.y - 20), (order.x + order.w+1, order.y),
+                      color, -1)
 
-    return order_list, img
+        black = np.array([125,125,125], dtype=np.uint8)
+        last_color = tuple(map(lambda x: int(x),color + black))
+        origin_img = cv2AddChineseText(origin_img, order.type, (order.x, order.y - 20), last_color, 14)
 
-    pass
+    return order_list, origin_img
