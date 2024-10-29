@@ -45,37 +45,29 @@ def add_fries(cooking_order_list):
         move_to_click(int(current.centerX / config.SCALE_FACTOR), int(current.centerY / config.SCALE_FACTOR), 0.1)
 
 def add_saweima(cooking_order_list):
-    current = find(lambda x: x.type == OrderTypeEnum.PIE, cooking_order_list)
+    pie = find(lambda x: x.type == OrderTypeEnum.PIE, cooking_order_list)
     pies = find(lambda x: x.type == OrderTypeEnum.MULTIPLE_PIE, cooking_order_list)
 
     if pies is None:
         return
 
-    if current is not None:
-        tmp_list = [OrderTypeEnum.MEAT_PLATE, OrderTypeEnum.CUCUMBER_PLATE, OrderTypeEnum.CHEESE_PLATE,
-                    OrderTypeEnum.FRENCH_FRIES_PLATE, ]
-        for type in tmp_list:
-            tmp = find(lambda x: x.type == type, cooking_order_list)
-            move_to_click(int(tmp.centerX / config.SCALE_FACTOR), int(tmp.centerY / config.SCALE_FACTOR), 0.1, 3)
-            time.sleep(0.2)
-    else:
+    if pie is None:
         move_to_click(int(pies.centerX / config.SCALE_FACTOR), int(pies.centerY / config.SCALE_FACTOR), 0.1)
         time.sleep(0.2)
-        tmp_list = [OrderTypeEnum.MEAT_PLATE, OrderTypeEnum.CUCUMBER_PLATE, OrderTypeEnum.CHEESE_PLATE, OrderTypeEnum.FRENCH_FRIES_PLATE, ]
-        for type in tmp_list:
-            tmp = find(lambda x: x.type == type, cooking_order_list)
-            move_to_click(int(tmp.centerX / config.SCALE_FACTOR), int(tmp.centerY / config.SCALE_FACTOR), 0.1, 3)
-            time.sleep(0.2)
 
-    pie = find(lambda x: x.type == OrderTypeEnum.PIE, cooking_order_list)
-    if pie is None:
-        return
+    tmp_list = [OrderTypeEnum.MEAT_PLATE, OrderTypeEnum.CUCUMBER_PLATE, OrderTypeEnum.CHEESE_PLATE, OrderTypeEnum.FRENCH_FRIES_PLATE, ]
+    for type in tmp_list:
+        tmp = find(lambda x: x.type == type, cooking_order_list)
+        move_to_click(int(tmp.centerX / config.SCALE_FACTOR), int(tmp.centerY / config.SCALE_FACTOR), 0.1, 3)
+        time.sleep(0.2)
+
     drag_move(int((pie.centerX) / config.SCALE_FACTOR), int((pie.y+pie.h) / config.SCALE_FACTOR), int((pie.centerX) / config.SCALE_FACTOR), int((pie.y) / config.SCALE_FACTOR), 0.1)
     time.sleep(0.2)
 
+def add_package(cooking_order_list):
     package = find(lambda x: x.type == OrderTypeEnum.PACKAGING_BAG, cooking_order_list)
-
-    if package is None:
+    pie = find(lambda x: x.type == OrderTypeEnum.PIE, cooking_order_list)
+    if package is None or pie is None:
         return
 
     drag_move(int((package.centerX) / config.SCALE_FACTOR), int((package.centerY) / config.SCALE_FACTOR),
@@ -105,6 +97,8 @@ def handler():
         time.sleep(10)
         add_fries(cooking_order_list)
         # add_saweima(cooking_order_list)
+        # time.sleep(0.2)
+        # add_package(cooking_order_list)
         pass
     cv2.imwrite("output.png", img)
 
