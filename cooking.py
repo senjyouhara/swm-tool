@@ -9,17 +9,18 @@ import config
 from model.OnnxModel import get_onnx_results
 from model.OrderInfo import OrderInfo
 
-def cv2AddChineseText(img: np.ndarray, text: str, position: Tuple[int, int], color: Tuple[int, ...], font_size = 14) -> np.ndarray:
+def cv2AddChineseText(img: np.ndarray, text: str, position: Tuple[int, int], color: Tuple[int, ...], font_size = 14):
     cv2img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     pilimg = Image.fromarray(cv2img)
     # PIL图片上打印汉字
     draw = ImageDraw.Draw(pilimg)  # 图片上打印
     # simsun 宋体
-    font = ImageFont.truetype("微软雅黑.ttf", font_size, encoding="utf-8")
+    font = ImageFont.truetype("simsun.ttf", font_size, encoding="utf-8")
     # 位置，文字，颜色==红色，字体引入
     draw.text(position, text, color, font=font)
+    bbox = pilimg.getbbox()
     # PIL图片转cv2 图片
-    return cv2.cvtColor(np.array(pilimg), cv2.COLOR_RGB2BGR)
+    return cv2.cvtColor(np.array(pilimg), cv2.COLOR_RGB2BGR), (bbox[2] - bbox[0], bbox[3] - bbox[1])
 
 def img_handle(img, type, template_img):
     img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
@@ -123,15 +124,31 @@ def get_cooking_info(img):
     colors = np.random.uniform(0, 255, size=(len(order_list), 3))
 
     for index,order in enumerate(order_list):
-        color = tuple(map(lambda x: int(x), colors[index]))
+        color = tuple(map(lambda x: int(x),colors[index]))
+        rectangle = np.zeros(origin_img.shape[:2], dtype="uint8")
+        rectangle = cv2.cvtColor(rectangle, cv2.COLOR_BGR2RGB)
 
-        cv2.rectangle(origin_img, (order.x, order.y), (order.x + order.w, order.y + order.h),
+        textImg = np.zeros(origin_img.shape[:2], dtype="uint8")
+        textImg, textinfo = cv2AddChineseText(textImg, order.type, (order.x, order.y - 20), (255,255,255), 16)
+        textImg = cv2.cvtColor(textImg, cv2.COLOR_BGR2GRAY)
+
+        cv2.rectangle(rectangle, (order.x, order.y), (order.x + order.w, order.y + order.h),
                       color, 2)
-        cv2.rectangle(origin_img, (order.x-1, order.y - 20), (order.x + order.w+1, order.y),
+        cv2.rectangle(rectangle, (order.x-1, order.y - 20), (order.x + order.w+1  if order.w+1 > textinfo[0] else order.x + textinfo[0], order.y),
                       color, -1)
+        rectangle = cv2.cvtColor(rectangle, cv2.COLOR_RGB2BGR)
+        ret, mask = cv2.threshold(textImg, 10, 255, cv2.THRESH_BINARY)
+        bitwise_and = cv2.bitwise_and(rectangle,rectangle, mask=cv2.bitwise_not(mask))
 
-        black = np.array([125,125,125], dtype=np.uint8)
-        last_color = tuple(map(lambda x: int(x),color + black))
-        origin_img = cv2AddChineseText(origin_img, order.type, (order.x, order.y - 20), last_color, 14)
+        gray_rectangle = cv2.cvtColor(bitwise_and, cv2.COLOR_BGR2GRAY)
+        ret2, mask2 = cv2.threshold(gray_rectangle, 10, 255, cv2.THRESH_BINARY)
+
+        img2_bg = cv2.bitwise_and(origin_img, origin_img, mask=cv2.bitwise_not(mask2))
+        dist = cv2.add(img2_bg, bitwise_and)
+        origin_img = dist
+        # cv2.imshow("Circle", dist)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+
 
     return order_list, origin_img
