@@ -24,10 +24,11 @@ def get_window_pwd(processName: str):
     processes = psutil.process_iter()
     process = None
     for process in processes:
-        # print(f"Process ID: {process.pid}, Name: {process.name()}")
-        if process.name() == processName and process.parent() == None:
-            process = process
-            break
+        if process.pid > 0:
+            # print(f"Process ID: {process.pid}, Name: {process.name()} , processName: {processName} {processName == process.name()} ,exe: {process.exe()},  parent: {process.parent()}")
+            if process.name() == processName:
+                process = process
+                break
 
     if process is None:
         print("未找到对应的进程！")

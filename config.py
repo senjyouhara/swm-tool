@@ -1,4 +1,4 @@
-PROCESS_NAME = "Feishu.exe"
+PROCESS_NAME = "Shawarma Legend.exe"
 
 SCALE_FACTOR = 0.5
 
