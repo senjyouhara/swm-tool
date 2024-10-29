@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 import config
 from model.OrderInfo import OrderInfo
-
+from myenum import OrderTypeEnum
 
 params = {
     'conf_thres': 0.5,  # 置信度阈值
@@ -15,9 +15,9 @@ params = {
 }
 
 classes = {
-    0: "肉块",
-    1: "小刀",
-    2: "土豆(切)"
+    0: OrderTypeEnum.MEAT,
+    1: OrderTypeEnum.KNIFE,
+    2: OrderTypeEnum.POTATO_PROCESS
 }
 colors = np.random.uniform(0, 255, size=(len(classes), 3))
 

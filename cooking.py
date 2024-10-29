@@ -8,6 +8,8 @@ from PIL import Image, ImageDraw, ImageFont
 import config
 from model.OnnxModel import get_onnx_results
 from model.OrderInfo import OrderInfo
+from myenum import OrderTypeEnum
+
 
 def cv2AddChineseText(img: np.ndarray, text: str, position: Tuple[int, int], color: Tuple[int, ...], font_size = 14):
     cv2img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -70,43 +72,43 @@ def img_handle(img, type, template_img):
 def get_cooking_info(img):
     type_list = [
         # {
-        #     "type": "厨子",
+        #     "type": OrderTypeEnum.COOK,
         #     "path": "assets/worker.png",
         # },
         {
-            "type": "奶酪",
+            "type": OrderTypeEnum.CHEESE,
             "path": "assets/cheese.png",
         },
         {
-            "type": "黄瓜",
+            "type": OrderTypeEnum.CUCUMBER,
             "path": "assets/cucumber.png",
         },
         {
-            "type": "大饼(多个)",
+            "type": OrderTypeEnum.MULTIPLE_PIE,
             "path": "assets/flatbread.png",
         },
         {
-            "type": "大饼",
+            "type": OrderTypeEnum.PIE,
             "path": "assets/flatbread-single.png",
         },
         {
-            "type": "油炸锅",
+            "type": OrderTypeEnum.DEEP_FRYER,
             "path": "assets/frying-machine.png",
         },
         # {
-        #     "type": "油炸锅(已完成)",
+        #     "type": OrderTypeEnum.DEEP_FRYER_FINISHED,
         #     "path": "assets/frying-machine-finish.png",
         # },
         {
-            "type": "金币",
+            "type": OrderTypeEnum.GOLD,
             "path": "assets/gold.png",
         },
         {
-            "type": "土豆",
+            "type": OrderTypeEnum.POTATO,
             "path": "assets/potato.png",
         },
         {
-            "type": "包装袋",
+            "type": OrderTypeEnum.PACKAGING_BAG,
             "path": "assets/wrapping-paper.png",
         },
     ]
@@ -116,6 +118,37 @@ def get_cooking_info(img):
 
     onnx_info_list = get_onnx_results(config.ONNX_MODEL,  img)
     order_list.extend(onnx_info_list)
+    find = None
+    for onnx_info in onnx_info_list:
+        if onnx_info.type == OrderTypeEnum.KNIFE:
+            find = onnx_info
+
+    if find is not None:
+        tmp_list = [{
+            'type': OrderTypeEnum.MEAT_PLATE
+        },{
+            'type': OrderTypeEnum.CUCUMBER_PLATE
+        },{
+            'type': OrderTypeEnum.CHEESE_PLATE
+        },{
+            'type': OrderTypeEnum.FRENCH_FRIES_PLATE
+        }]
+        w = int(100 * config.SCALE_FACTOR)
+        h = int(110 * config.SCALE_FACTOR)
+        score = 0.8
+        x = int(find.x+find.w - int(95 * config.SCALE_FACTOR) - int(40 * config.SCALE_FACTOR))
+        for item in tmp_list:
+            x += int(50 * config.SCALE_FACTOR) + w
+            order_list.append(OrderInfo(
+                type=item.get('type'),
+                x=x,
+                y=find.y,
+                w=w,
+                h=h,
+                centerX=x + int(w * 0.5),
+                centerY=find.y + int(h * 0.5),
+                score=score,
+            ))
 
     for type in type_list:
         tmp = img_handle(img, type['type'], cv2.imread(type['path']))
@@ -129,7 +162,7 @@ def get_cooking_info(img):
         rectangle = cv2.cvtColor(rectangle, cv2.COLOR_BGR2RGB)
 
         textImg = np.zeros(origin_img.shape[:2], dtype="uint8")
-        textImg, textinfo = cv2AddChineseText(textImg, order.type, (order.x, order.y - 20), (255,255,255), 16)
+        textImg, textinfo = cv2AddChineseText(textImg, "".join(order.type.value), (order.x, order.y - 19), (255,255,255), 16)
         textImg = cv2.cvtColor(textImg, cv2.COLOR_BGR2GRAY)
 
         cv2.rectangle(rectangle, (order.x, order.y), (order.x + order.w, order.y + order.h),
@@ -146,9 +179,5 @@ def get_cooking_info(img):
         img2_bg = cv2.bitwise_and(origin_img, origin_img, mask=cv2.bitwise_not(mask2))
         dist = cv2.add(img2_bg, bitwise_and)
         origin_img = dist
-        # cv2.imshow("Circle", dist)
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
-
 
     return order_list, origin_img

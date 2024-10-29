@@ -1,5 +1,8 @@
+from myenum import OrderTypeEnum
+
+
 class OrderInfo:
-    type: str
+    type: OrderTypeEnum
     x: int
     y: int
     w: int
@@ -9,7 +12,7 @@ class OrderInfo:
     is_finished: bool
     score: float
 
-    def __init__(self, type, x, y, w, h, centerX, centerY, score, is_finished=False):
+    def __init__(self, type: OrderTypeEnum, x, y, w, h, centerX, centerY, score, is_finished=False):
         self.type = type
         self.x = x
         self.y = y
