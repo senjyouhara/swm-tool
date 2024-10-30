@@ -5,7 +5,7 @@ from model.OrderInfo import OrderInfo
 
 
 # 移动到指定地方并点击
-def move_to_click(x: int, y: int, timeout: float, circle_count=1):
+def click(x: int, y: int, timeout: float, circle_count=1):
     pyautogui.moveTo(x, y, timeout, pytweening.easeOutQuad)  # 相对于当前位置移动鼠标，x、y可以为负数
     pyautogui.click(x=x, y=y, clicks=circle_count)  # 左击当前位置
 

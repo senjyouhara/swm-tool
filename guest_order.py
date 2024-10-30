@@ -5,6 +5,7 @@ from typing import List, Dict
 
 import config
 from model.OrderInfo import OrderInfo
+from myenum import OrderTypeEnum
 
 
 def img_handle(img, type, template_img):
@@ -34,28 +35,28 @@ def get_order_info(img):
 
     type_list = [
         {
-            "type": "沙威玛",
+            "type": OrderTypeEnum.ORDER_SAWEIMA,
             "path": "assets/guest_order/swm.png",
         },
         {
-            "type": "可乐",
-            "path": "assets/guest_order/cola_b.png",
+            "type": OrderTypeEnum.ORDER_COLA,
+            "path": "assets/guest_order/cola.png",
         },
         {
-            "type": "橙汁",
-            "path": "assets/guest_order/cola_o.png",
+            "type": OrderTypeEnum.ORDER_ORANGE_JUICE,
+            "path": "assets/guest_order/orange-juice.png",
         },
         {
-            "type": "果汁",
-            "path": "assets/guest_order/box.png",
+            "type": OrderTypeEnum.ORDER_JUICE,
+            "path": "assets/guest_order/juice.png",
         },
         {
-            "type": "薯条",
-            "path": "assets/guest_order/shutiao.png",
+            "type": OrderTypeEnum.ORDER_FRIES,
+            "path": "assets/guest_order/fries.png",
         },
         {
-            "type": "红薯",
-            "path": "assets/guest_order/digua.png",
+            "type": OrderTypeEnum.ORDER_SWEET_POTATO,
+            "path": "assets/guest_order/sweet-potato.png",
         },
     ]
 

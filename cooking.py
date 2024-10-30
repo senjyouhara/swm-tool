@@ -88,18 +88,6 @@ def get_cooking_info(img):
             "path": "assets/flatbread.png",
         },
         {
-            "type": OrderTypeEnum.PIE,
-            "path": "assets/flatbread-single.png",
-        },
-        {
-            "type": OrderTypeEnum.DEEP_FRYER,
-            "path": "assets/frying-machine.png",
-        },
-        # {
-        #     "type": OrderTypeEnum.DEEP_FRYER_FINISHED,
-        #     "path": "assets/frying-machine-finish.png",
-        # },
-        {
             "type": OrderTypeEnum.GOLD,
             "path": "assets/gold.png",
         },
@@ -149,6 +137,42 @@ def get_cooking_info(img):
                 centerY=find.y + int(h * 0.5),
                 score=score,
             ))
+
+    temp = [
+        {
+            "type": OrderTypeEnum.PIE,
+            "path": "assets/flatbread-single.png",
+        },
+        {
+            "type": OrderTypeEnum.PIE_FINISH,
+            "path": "assets/flatbread-finish.png",
+        },
+    ]
+    for item in temp:
+        tmp = img_handle(img, item['type'], cv2.imread(item['path']))
+        if tmp is not None:
+            order_list.append(tmp)
+            break
+
+    temp = [
+        {
+            "type": OrderTypeEnum.DEEP_FRYER,
+            "path": "assets/frying-machine.png",
+        },
+        {
+            "type": OrderTypeEnum.DEEP_FRYER_PROCESS,
+            "path": "assets/frying-machine-process.png",
+        },
+        {
+            "type": OrderTypeEnum.DEEP_FRYER_FINISHED,
+            "path": "assets/frying-machine-finish.png",
+        },
+    ]
+    for item in temp:
+        tmp = img_handle(img, item['type'], cv2.imread(item['path']))
+        if tmp is not None:
+            order_list.append(tmp)
+            break
 
     for type in type_list:
         tmp = img_handle(img, type['type'], cv2.imread(type['path']))
