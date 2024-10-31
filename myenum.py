@@ -18,6 +18,7 @@ class OrderTypeEnum(Enum):
     PIE = "大饼",
     PIE_FINISH = "大饼(加好料)",
     SAWEIMA_FINISHED = "沙威玛(已完成)",
+    SAWEIMA_ROLL = "沙威玛(卷起)",
     GOLD = "金币",
     PACKAGING_BAG = "包装袋",
     KETCHUP = "番茄酱",

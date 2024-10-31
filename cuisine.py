@@ -122,12 +122,12 @@ class Cuisine:
     # 打包沙威玛
     def add_package(self):
         package = find(lambda x: x.type == OrderTypeEnum.PACKAGING_BAG, self.cooking_order_list)
-        pie = find(lambda x: x.type == OrderTypeEnum.PIE, self.cooking_order_list)
-        if package is None or pie is None:
+        saweima_roll = find(lambda x: x.type == OrderTypeEnum.SAWEIMA_ROLL, self.cooking_order_list)
+        if package is None or saweima_roll is None:
             return
 
         drag_move(int((package.centerX) / config.SCALE_FACTOR), int((package.centerY) / config.SCALE_FACTOR),
-                  int((pie.centerX) / config.SCALE_FACTOR), int((pie.centerY) / config.SCALE_FACTOR), 0.1)
+                  int((saweima_roll.centerX) / config.SCALE_FACTOR), int((saweima_roll.centerY) / config.SCALE_FACTOR), 0.1)
 
     def food_for_guest(self, type, guestType):
         food = find(lambda x: x.type == type, self.cooking_order_list)

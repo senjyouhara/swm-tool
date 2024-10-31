@@ -99,6 +99,10 @@ def get_cooking_info(img):
             "type": OrderTypeEnum.PACKAGING_BAG,
             "path": "assets/wrapping-paper.png",
         },
+        {
+            "type": OrderTypeEnum.SAWEIMA_ROLL,
+            "path": "assets/flatbread-roll.png",
+        },
     ]
 
     order_list: List[OrderInfo] = []
